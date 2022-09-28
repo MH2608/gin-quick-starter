@@ -1,0 +1,15 @@
+{
+  "/v1": {
+    "middlewares": [],
+    "son_nodes": [
+      {
+        "test": {
+          "middlewares": [],
+          "son_nodes": [],
+          "router_handlers": ["testHandler"]
+        }
+      }
+    ],
+    "router_handlers": []
+  }
+}
