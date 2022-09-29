@@ -40,7 +40,7 @@ func makeTreeFromJObj(path string, j *jsonx.JObj) *RouterNode {
 	}
 	return thisNode
 }
-func RestfulToGin(restfulType, path string, ginRouter *gin.RouterGroup) (func(func(c *gin.Context)), error) {
+func restfulToGin(restfulType, path string, ginRouter *gin.RouterGroup) (func(func(c *gin.Context)), error) {
 	var retFunc func(relativePath string, handlers ...gin.HandlerFunc) gin.IRoutes
 	var err error
 	switch strings.ToLower(restfulType) {

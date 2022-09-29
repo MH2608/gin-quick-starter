@@ -5,7 +5,7 @@ import (
 )
 
 type Router interface {
-	Init()
+	init()
 }
 type Handler struct {
 	SpecificPath string
@@ -19,7 +19,7 @@ type RouterNode struct {
 	RouterHandlers []Handler
 }
 
-func (node *RouterNode) Init(router gin.IRouter) {
+func (node *RouterNode) init(router gin.IRouter) {
 	if node == nil {
 		return
 	}
@@ -29,14 +29,14 @@ func (node *RouterNode) Init(router gin.IRouter) {
 	}
 	if node.RouterHandlers != nil {
 		for _, routerFunc := range node.RouterHandlers {
-			if ginFunc, err := RestfulToGin(routerFunc.FuncType, routerFunc.SpecificPath, thisGroup); err == nil {
+			if ginFunc, err := restfulToGin(routerFunc.FuncType, routerFunc.SpecificPath, thisGroup); err == nil {
 				ginFunc(routerFunc.HandlerFunc)
 			}
 		}
 	}
 	if node.SonNodes != nil {
 		for _, routerNode := range node.SonNodes {
-			routerNode.Init(thisGroup)
+			routerNode.init(thisGroup)
 		}
 	}
 

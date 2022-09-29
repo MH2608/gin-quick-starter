@@ -8,6 +8,8 @@ import (
 var funcPool = make(map[string]gin.HandlerFunc)
 var engine *gin.Engine
 
+// BindStarter construct all RouterNode by your given json Map
+// Notice: this function do not bind your all handler in your gin-router-tree
 func BindStarter(obj *jsonx.JObj) []*RouterNode {
 	ret := make([]*RouterNode, 0)
 	for path, value := range *obj {
@@ -19,15 +21,21 @@ func BindStarter(obj *jsonx.JObj) []*RouterNode {
 	}
 	return ret
 }
+
+// GinStart call this function after you bound all routerNode by func BindStarter
+// of course you should init engine before call it
 func GinStart(rootNodes []*RouterNode) *gin.Engine {
 	if !checkEngine() {
 		panic("engine haven't init")
 	}
 	for _, rootNode := range rootNodes {
-		rootNode.Init(engine)
+		rootNode.init(engine)
 	}
 	return engine
 }
+
+// AddHandler for add a handler into handler pool
+// actually you should call this function to register all your handler ,so you can register your handler/middleware to the gin-route-tree
 func AddHandler(name string, addFunc gin.HandlerFunc) bool {
 	if _, hit := funcPool[name]; hit {
 		return false
@@ -41,6 +49,8 @@ func getHandlerByName(name string) gin.HandlerFunc {
 	}
 	panic("func pool not exists " + name + ",maybe you didn't register it")
 }
+
+// NewFromExist init gin-quick-starter engine by your exists gin.Engine
 func NewFromExist(exist *gin.Engine) bool {
 	if checkEngine() {
 		return false
@@ -48,6 +58,8 @@ func NewFromExist(exist *gin.Engine) bool {
 	engine = exist
 	return true
 }
+
+// New init gin-quick-starter engine by gin.New
 func New() bool {
 	if checkEngine() {
 		return false
@@ -55,11 +67,13 @@ func New() bool {
 	engine = gin.New()
 	return true
 }
+
+// Default init gin-quick-starter engine by gin.Default
 func Default() bool {
 	if checkEngine() {
 		return false
 	}
-	engine = gin.New()
+	engine = gin.Default()
 	return true
 }
 func checkEngine() bool {
