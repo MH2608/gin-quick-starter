@@ -1,9 +1,7 @@
 package starter
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"strings"
 )
 
 type Router interface {
@@ -16,7 +14,7 @@ type Handler struct {
 }
 type RouterNode struct {
 	MiddleWares    []gin.HandlerFunc
-	SonNodes       []RouterNode
+	SonNodes       []*RouterNode
 	SpecificPath   string
 	RouterHandlers []Handler
 }
@@ -42,27 +40,4 @@ func (node *RouterNode) Init(router gin.IRouter) {
 		}
 	}
 
-}
-func RestfulToGin(restfulType, path string, ginRouter *gin.RouterGroup) (func(func(c *gin.Context)), error) {
-	var retFunc func(relativePath string, handlers ...gin.HandlerFunc) gin.IRoutes
-	var err error
-	switch strings.ToLower(restfulType) {
-	case "get":
-		retFunc = ginRouter.GET
-	case "post":
-		retFunc = ginRouter.POST
-	case "put":
-		retFunc = ginRouter.PUT
-	case "delete":
-		retFunc = ginRouter.DELETE
-	case "head":
-		retFunc = ginRouter.HEAD
-	case "options":
-		retFunc = ginRouter.OPTIONS
-	default:
-		err = fmt.Errorf("wrong http type")
-	}
-	return func(f func(c *gin.Context)) {
-		retFunc(path, f)
-	}, err
 }

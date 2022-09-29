@@ -89,6 +89,13 @@ func (j *JObj) GetString(key string) string {
 	}
 	return ""
 }
+func GetJObjFromInterface(src interface{}) (*JObj, bool) {
+	if got, hit := (src).(map[string]interface{}); hit {
+		ret := (*JObj)(&got)
+		return ret, hit
+	}
+	return nil, false
+}
 func DecodeFromJson(infoRaw string) *JObj {
 	ret := make(JObj)
 	if err := json.Unmarshal([]byte(infoRaw), &ret); err != nil {
@@ -96,6 +103,6 @@ func DecodeFromJson(infoRaw string) *JObj {
 	}
 	return &ret
 }
-func DecodeFromMap(src map[string]interface{}) JObj {
-	return src
+func DecodeFromMap(src map[string]interface{}) *JObj {
+	return (*JObj)(&src)
 }
