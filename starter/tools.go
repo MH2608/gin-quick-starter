@@ -2,7 +2,7 @@ package starter
 
 import (
 	"fmt"
-	"gin-quick-starter/util/jsonx"
+	"github.com/MH2608/gin-quick-starter/util/jsonx"
 	"github.com/gin-gonic/gin"
 	"strings"
 )
