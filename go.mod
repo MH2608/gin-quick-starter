@@ -1,4 +1,4 @@
-module gin-quick-starter
+module github.com/MH2608/gin-quick-starter
 
 go 1.19
 
