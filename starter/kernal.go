@@ -5,8 +5,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var hookerPool = make(map[string]Hooker)
 var funcPool = make(map[string]gin.HandlerFunc)
 var engine *gin.Engine
+
+func AddHooker(name string, hooker Hooker) bool {
+	if _, hit := hookerPool[name]; hit {
+		return false
+	}
+	hookerPool[name] = hooker
+	return true
+}
+
+func getHookerByName(name string) Hooker {
+	if hooker, hit := hookerPool[name]; hit {
+		return hooker
+	}
+	panic("hooker pool not exists " + name + ",maybe you didn't register it")
+}
 
 // BindStarter construct all RouterNode by your given json Map
 // Notice: this function do not bind your all handler in your gin-router-tree

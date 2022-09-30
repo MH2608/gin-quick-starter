@@ -106,3 +106,9 @@ func DecodeFromJson(infoRaw string) *JObj {
 func DecodeFromMap(src map[string]interface{}) *JObj {
 	return (*JObj)(&src)
 }
+func InterfaceToString(src interface{}) string {
+	if got, hit := src.(string); hit {
+		return got
+	}
+	return fmt.Sprintf("%v", src)
+}

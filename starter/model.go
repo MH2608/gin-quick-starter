@@ -7,30 +7,36 @@ import (
 type Router interface {
 	init()
 }
+type Hooker func(r *gin.RouterGroup) bool
 type Handler struct {
-	SpecificPath string
 	FuncType     string
-	HandlerFunc  gin.HandlerFunc
+	HandlerFuncs []gin.HandlerFunc
 }
 type RouterNode struct {
 	MiddleWares    []gin.HandlerFunc
 	SonNodes       []*RouterNode
 	SpecificPath   string
 	RouterHandlers []Handler
+	Hookers        []Hooker
 }
 
 func (node *RouterNode) init(router gin.IRouter) {
 	if node == nil {
 		return
 	}
-	var thisGroup *gin.RouterGroup
+	var thisGroup = router.Group(node.SpecificPath)
+	if node.Hookers != nil {
+		for _, hooker := range node.Hookers {
+			hooker(thisGroup)
+		}
+	}
 	if node.MiddleWares != nil {
-		thisGroup = router.Group(node.SpecificPath, node.MiddleWares...)
+		thisGroup.Use(node.MiddleWares...)
 	}
 	if node.RouterHandlers != nil {
 		for _, routerFunc := range node.RouterHandlers {
-			if ginFunc, err := restfulToGin(routerFunc.FuncType, routerFunc.SpecificPath, thisGroup); err == nil {
-				ginFunc(routerFunc.HandlerFunc)
+			if ginFunc, err := restfulToGin(routerFunc.FuncType, thisGroup); err == nil {
+				ginFunc(routerFunc.HandlerFuncs...)
 			}
 		}
 	}

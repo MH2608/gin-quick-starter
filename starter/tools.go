@@ -7,31 +7,12 @@ import (
 	"strings"
 )
 
-func makeTreeFromJObj(path string, j *jsonx.JObj) *RouterNode {
+func makeTreeFromJObj(path string, obj *jsonx.JObj) *RouterNode {
 	thisNode := &RouterNode{SpecificPath: path, MiddleWares: make([]gin.HandlerFunc, 0), SonNodes: make([]*RouterNode, 0), RouterHandlers: make([]Handler, 0)}
-	if middlewares := j.GetJArr("middlewares"); middlewares != nil {
-		for _, funcName := range *middlewares {
-			if got, ok := funcName.(string); ok {
-				if function, hit := funcPool[got]; hit {
-					thisNode.MiddleWares = append(thisNode.MiddleWares, function)
-				} else {
-					panic("func pool not exists " + got + ",maybe you didn't register it")
-				}
-			} else {
-				panic("value of middleware must be string")
-			}
-		}
-	}
-	if routerHandlers := j.GetJArr("router_handlers"); routerHandlers != nil {
-		for _, got := range *routerHandlers {
-			if handler, hit := jsonx.GetJObjFromInterface(got); hit {
-				thisNode.RouterHandlers = append(thisNode.RouterHandlers, Handler{SpecificPath: handler.GetString("path"), FuncType: handler.GetString("type"), HandlerFunc: getHandlerByName(handler.GetString("func"))})
-			} else {
-				panic("router_handlers format wrong with path " + path)
-			}
-		}
-	}
-	if sonNodes := j.GetJObj("son_nodes"); sonNodes != nil {
+	initMiddleWares(obj, thisNode)
+	initHandlers(path, obj, thisNode)
+	initHookers(obj, thisNode)
+	if sonNodes := obj.GetJObj("son"); sonNodes != nil {
 		for key, value := range *sonNodes {
 			if node, hit := jsonx.GetJObjFromInterface(value); hit {
 				thisNode.SonNodes = append(thisNode.SonNodes, makeTreeFromJObj(key, node))
@@ -40,7 +21,53 @@ func makeTreeFromJObj(path string, j *jsonx.JObj) *RouterNode {
 	}
 	return thisNode
 }
-func restfulToGin(restfulType, path string, ginRouter *gin.RouterGroup) (func(func(c *gin.Context)), error) {
+func initHookers(j *jsonx.JObj, thisNode *RouterNode) {
+	hookers := make([]Hooker, 0)
+	if hookerNames := j.GetJArr("hookers"); hookers != nil {
+		for _, hookerName := range *hookerNames {
+			hookers = append(hookers, getHookerByName(jsonx.InterfaceToString(hookerName)))
+		}
+	}
+	thisNode.Hookers = hookers
+}
+func initHandlers(path string, j *jsonx.JObj, thisNode *RouterNode) {
+	if routerHandlers := j.GetJArr("handlers"); routerHandlers != nil {
+		funcMapper := make(map[string][]gin.HandlerFunc)
+		for _, got := range *routerHandlers {
+			handler := strings.Split(jsonx.InterfaceToString(got), "/")
+			if len(handler) != 2 {
+				panic("wrong format of handler:" + jsonx.InterfaceToString(got) + " path:" + path)
+			}
+			if funcSlice, hit := funcMapper[handler[0]]; hit {
+				funcMapper[handler[0]] = append(funcSlice, getHandlerByName(handler[1]))
+			} else {
+				newFuncSlice := make([]gin.HandlerFunc, 0)
+				funcMapper[handler[0]] = append(newFuncSlice, getHandlerByName(handler[1]))
+			}
+
+		}
+		for httpType, handlers := range funcMapper {
+			thisNode.RouterHandlers = append(thisNode.RouterHandlers, Handler{FuncType: httpType, HandlerFuncs: handlers})
+		}
+	}
+}
+
+func initMiddleWares(j *jsonx.JObj, thisNode *RouterNode) {
+	if middlewares := j.GetJArr("mid"); middlewares != nil {
+		for _, funcName := range *middlewares {
+			if got, ok := funcName.(string); ok {
+				if function, hit := funcPool[got]; hit {
+					thisNode.MiddleWares = append(thisNode.MiddleWares, function)
+				} else {
+					panic("func pool not exists " + got + ",maybe you didn't register it")
+				}
+			} else {
+				panic("value of mid must be string")
+			}
+		}
+	}
+}
+func restfulToGin(restfulType string, ginRouter *gin.RouterGroup) (func(...gin.HandlerFunc), error) {
 	var retFunc func(relativePath string, handlers ...gin.HandlerFunc) gin.IRoutes
 	var err error
 	switch strings.ToLower(restfulType) {
@@ -59,7 +86,7 @@ func restfulToGin(restfulType, path string, ginRouter *gin.RouterGroup) (func(fu
 	default:
 		err = fmt.Errorf("wrong http type")
 	}
-	return func(f func(c *gin.Context)) {
-		retFunc(path, f)
+	return func(f ...gin.HandlerFunc) {
+		retFunc("", f...)
 	}, err
 }
