@@ -4,9 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Router interface {
-	init()
-}
 type Hooker func(r *gin.RouterGroup) bool
 type Handler struct {
 	FuncType     string

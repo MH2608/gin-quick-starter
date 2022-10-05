@@ -23,7 +23,7 @@ func makeTreeFromJObj(path string, obj *jsonx.JObj) *RouterNode {
 }
 func initHookers(j *jsonx.JObj, thisNode *RouterNode) {
 	hookers := make([]Hooker, 0)
-	if hookerNames := j.GetJArr("hookers"); hookers != nil {
+	if hookerNames := j.GetJArr("hookers"); hookerNames != nil {
 		for _, hookerName := range *hookerNames {
 			hookers = append(hookers, getHookerByName(jsonx.InterfaceToString(hookerName)))
 		}

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mitchellh/mapstructure"
+	"os"
 )
 
 type JObj map[string]interface{}
@@ -102,6 +103,18 @@ func DecodeFromJson(infoRaw string) *JObj {
 		return &ret
 	}
 	return &ret
+}
+func DecodeFromFile(path string) *JObj {
+	ret := make(JObj)
+	jsonRaw, err := os.ReadFile(path)
+	if err != nil {
+		return &ret
+	}
+	if err = json.Unmarshal(jsonRaw, &ret); err != nil {
+		return &ret
+	}
+	return &ret
+
 }
 func DecodeFromMap(src map[string]interface{}) *JObj {
 	return (*JObj)(&src)

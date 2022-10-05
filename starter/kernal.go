@@ -74,6 +74,26 @@ func NewFromExist(exist *gin.Engine) bool {
 	engine = exist
 	return true
 }
+func StartFromJsonFile(path string) *gin.Engine {
+	jObj := jsonx.DecodeFromFile(path)
+	if !Default() {
+		panic("gin engine has been initialized")
+	}
+	return GinStart(BindStarter(jObj))
+}
+func StartFromMap(jMap map[string]interface{}) *gin.Engine {
+	jObj := (*jsonx.JObj)(&jMap)
+	if !Default() {
+		panic("gin engine has been initialized")
+	}
+	return GinStart(BindStarter(jObj))
+}
+func StartFromJObj(jObj *jsonx.JObj) *gin.Engine {
+	if !Default() {
+		panic("gin engine has been initialized")
+	}
+	return GinStart(BindStarter(jObj))
+}
 
 // New init gin-quick-starter engine by gin.New
 func New() bool {
