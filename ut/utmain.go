@@ -1,13 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"github.com/MH2608/gin-quick-starter/starter"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	InitTest()
-	starter.StartFromJsonFile("./ut/testKernal.json").Run(":8080")
+	fmt.Printf("%v", starter.StartFromJsonFile("./ut/testKernal.json").Routes())
+
 }
 func InitTest() {
 	starter.AddHandler("testHandler", testHandler)
