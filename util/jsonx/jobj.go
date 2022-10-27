@@ -9,7 +9,7 @@ import (
 type JObj map[string]interface{}
 
 func (j *JObj) GetStr(key string) string {
-	if j == nil || *j == nil {
+	if !j.isValid() {
 		return ""
 	}
 	if getter, hit := (*j)[key]; hit {
@@ -18,7 +18,7 @@ func (j *JObj) GetStr(key string) string {
 	return ""
 }
 func (j *JObj) GetBool(key string) bool {
-	if j == nil || *j == nil {
+	if !j.isValid() {
 		return false
 	}
 	if getter, hit := (*j)[key]; hit {
@@ -29,7 +29,7 @@ func (j *JObj) GetBool(key string) bool {
 	return false
 }
 func (j *JObj) GetJObj(key string) *JObj {
-	if j == nil || *j == nil {
+	if !j.isValid() {
 		return nil
 	}
 	if getter, hit := (*j)[key]; hit {
@@ -41,7 +41,7 @@ func (j *JObj) GetJObj(key string) *JObj {
 	return nil
 }
 func (j *JObj) GetJArr(key string) *JArr {
-	if j == nil || *j == nil {
+	if !j.isValid() {
 		return nil
 	}
 	if getter, hit := (*j)[key]; hit {
@@ -51,35 +51,76 @@ func (j *JObj) GetJArr(key string) *JArr {
 	}
 	return nil
 }
+func (j *JObj) GetStrArr(key string) []string {
+	ret := make([]string, 0)
+	src := j.GetJArr(key)
+	if j.isValid() {
+		src.Foreach(func(index int, value interface{}) bool {
+			ret = append(ret, fmt.Sprint(value))
+			return true
+		})
+	}
+	return ret
+}
 func (j *JObj) GetStruct(key string, ret interface{}) {
 	if mapper := j.GetJObj(key); mapper != nil {
 		mapstructure.Decode(mapper, ret)
 	}
 }
 func (j *JObj) GetInt(key string) int64 {
-	if j == nil || *j == nil {
+	if !j.isValid() {
 		return 0
 	}
 	if getter, hit := (*j)[key]; hit {
-		if got, hit := getter.(float64); hit {
+		switch got := getter.(type) {
+		case float64:
 			return int64(got)
+		case float32:
+			return int64(got)
+		case int:
+			return int64(got)
+		case int64:
+			return got
+		case int32:
+			return int64(got)
+		case int16:
+			return int64(got)
+		case int8:
+			return int64(got)
+		default:
+			return 0
 		}
 	}
 	return 0
 }
 func (j *JObj) GetFloat(key string) float64 {
-	if j == nil || *j == nil {
+	if !j.isValid() {
 		return 0
 	}
 	if getter, hit := (*j)[key]; hit {
-		if got, hit := getter.(float64); hit {
+		switch got := getter.(type) {
+		case float64:
 			return got
+		case float32:
+			return float64(got)
+		case int:
+			return float64(got)
+		case int64:
+			return float64(got)
+		case int32:
+			return float64(got)
+		case int16:
+			return float64(got)
+		case int8:
+			return float64(got)
+		default:
+			return 0
 		}
 	}
 	return 0
 }
 func (j *JObj) GetString(key string) string {
-	if j == nil || *j == nil {
+	if !j.isValid() {
 		return ""
 	}
 	if getter, hit := (*j)[key]; hit {
@@ -89,13 +130,6 @@ func (j *JObj) GetString(key string) string {
 	}
 	return ""
 }
-func GetJObjFromInterface(src interface{}) (*JObj, bool) {
-	if got, hit := (src).(map[string]interface{}); hit {
-		ret := (*JObj)(&got)
-		return ret, hit
-	}
-	return nil, false
-}
 func DecodeFromJson(infoRaw string) *JObj {
 	ret := make(JObj)
 	if err := json.Unmarshal([]byte(infoRaw), &ret); err != nil {
@@ -103,12 +137,31 @@ func DecodeFromJson(infoRaw string) *JObj {
 	}
 	return &ret
 }
-func DecodeFromMap(src map[string]interface{}) *JObj {
-	return (*JObj)(&src)
+func DecodeFromMap(src map[string]interface{}) JObj {
+	return src
 }
-func InterfaceToString(src interface{}) string {
-	if got, hit := src.(string); hit {
-		return got
+func (j *JObj) Foreach(looper func(key string, value interface{})) {
+	if !j.isValid() {
+		return
 	}
-	return fmt.Sprintf("%v", src)
+	for k, v := range *j {
+		looper(k, v)
+	}
+}
+func (j *JObj) isValid() bool {
+	if j == nil || *j == nil {
+		return false
+	}
+	return true
+}
+func (j *JObj) CheckRequire(requireField ...string) bool {
+	if !j.isValid() {
+		return false
+	}
+	for _, field := range requireField {
+		if _, ok := (*j)[field]; !ok {
+			return false
+		}
+	}
+	return true
 }
