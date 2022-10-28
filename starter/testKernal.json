@@ -1,0 +1,17 @@
+{
+  "/v1": {
+    "son": {
+      "test": {
+        "handlers": ["get/testHandler"]
+      },
+      "admin": {
+        "mid": ["check_authorize","set_token"],
+        "son": {
+          "login": {
+            "handlers": ["post/check_login","post/auth_token"]
+          }
+        }
+      }
+    }
+  }
+}
