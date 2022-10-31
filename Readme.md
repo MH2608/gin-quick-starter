@@ -56,13 +56,21 @@ func authToken(c *gin.Context) {
   "v1": {
     "son": {
       "test": {
-        "handlers": ["get/testHandler"]
+        "handlers": [
+          "get/testHandler"
+        ]
       },
       "admin": {
-        "mid": ["checkAuthorize","setToken"],
+        "mid": [
+          "checkAuthorize",
+          "setToken"
+        ],
         "son": {
           "login": {
-            "handlers": ["post/checkLogin","post/authToken"]
+            "handlers": [
+              "post/checkLogin",
+              "post/authToken"
+            ]
           }
         }
       }

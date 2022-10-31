@@ -23,7 +23,7 @@ import (
 //		Handler := MakeCommonHandler(testReq{}, ErrorFunc, SuccessFunc)
 //		engine := gin.New()
 //		engine.GET("test", Handler)
-//	}
+//
 //
 //	func ErrorFunc(c *gin.Context, code int, err error) {
 //		c.JSON(code, struct {
@@ -40,7 +40,8 @@ import (
 // /*
 func MakeCommonHandler(req BusinessReq, errorFunc func(c *gin.Context, code int, err error), successFunc func(c *gin.Context, data interface{})) gin.HandlerFunc {
 	ret := func(c *gin.Context) {
-		if err := c.ShouldBind(&req); err != nil {
+		reqCopy := req
+		if err := c.ShouldBind(&reqCopy); err != nil {
 			errorFunc(c, 400, errors.New("req bind failed"))
 			return
 		}
