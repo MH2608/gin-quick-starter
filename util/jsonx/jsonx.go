@@ -1,5 +1,7 @@
 package jsonx
 
+import "fmt"
+
 type JsonX interface {
 	ToString() string
 }
@@ -33,4 +35,20 @@ func Ternary(condition bool, True interface{}, False interface{}) interface{} {
 	} else {
 		return False
 	}
+}
+func GetJObjFromInterface(src interface{}) (*JObj, bool) {
+	if got, hit := (src).(map[string]interface{}); hit {
+		ret := (*JObj)(&got)
+		return ret, hit
+	}
+	if got, hit := src.(*JObj); hit {
+		return got, hit
+	}
+	if got, hit := src.(*map[string]interface{}); hit {
+		return (*JObj)(got), hit
+	}
+	return nil, false
+}
+func InterfaceToString(src interface{}) string {
+	return fmt.Sprintf("%v", src)
 }

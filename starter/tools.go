@@ -10,6 +10,7 @@ import (
 func makeTreeFromJObj(path string, obj *jsonx.JObj) *RouterNode {
 	thisNode := &RouterNode{SpecificPath: path, MiddleWares: make([]gin.HandlerFunc, 0), SonNodes: make([]*RouterNode, 0), RouterHandlers: make([]Handler, 0)}
 	initMiddleWares(obj, thisNode)
+
 	initHandlers(path, obj, thisNode)
 	initHookers(obj, thisNode)
 	if sonNodes := obj.GetJObj("son"); sonNodes != nil {
