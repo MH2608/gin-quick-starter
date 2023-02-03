@@ -7,7 +7,7 @@ import (
 type Router interface {
 	init()
 }
-type Hooker func(r *gin.RouterGroup) bool
+type Hooker func(r *gin.RouterGroup)
 type Handler struct {
 	FuncType     string
 	HandlerFuncs []gin.HandlerFunc

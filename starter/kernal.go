@@ -1,6 +1,8 @@
 package starter
 
 import (
+	"io"
+
 	"github.com/MH2608/gin-quick-starter/util/jsonx"
 	"github.com/gin-gonic/gin"
 )
@@ -8,6 +10,8 @@ import (
 var hookerPool = make(map[string]Hooker)
 var funcPool = make(map[string]gin.HandlerFunc)
 var engine *gin.Engine
+var openRecordQPS bool
+var QPSOuter io.Writer
 
 func AddHooker(name string, hooker Hooker) bool {
 	if _, hit := hookerPool[name]; hit {
@@ -41,7 +45,7 @@ func BindStarter(obj *jsonx.JObj) []*RouterNode {
 // GinStart call this function after you bound all routerNode by func BindStarter
 // of course you should init engine before call it
 func GinStart(rootNodes []*RouterNode) *gin.Engine {
-	if !checkEngine() {
+	if !isEngineEmpty() {
 		panic("engine haven't init")
 	}
 	for _, rootNode := range rootNodes {
@@ -68,7 +72,7 @@ func getHandlerByName(name string) gin.HandlerFunc {
 
 // NewFromExist init gin-quick-starter engine by your exists gin.Engine
 func NewFromExist(exist *gin.Engine) bool {
-	if checkEngine() {
+	if isEngineEmpty() {
 		return false
 	}
 	engine = exist
@@ -77,7 +81,7 @@ func NewFromExist(exist *gin.Engine) bool {
 
 // New init gin-quick-starter engine by gin.New
 func New() bool {
-	if checkEngine() {
+	if isEngineEmpty() {
 		return false
 	}
 	engine = gin.New()
@@ -86,15 +90,31 @@ func New() bool {
 
 // Default init gin-quick-starter engine by gin.Default
 func Default() bool {
-	if checkEngine() {
+	if isEngineEmpty() {
 		return false
 	}
 	engine = gin.Default()
 	return true
 }
-func checkEngine() bool {
-	if engine == nil {
-		return false
-	}
-	return true
+func isEngineEmpty() bool {
+	return engine != nil
+}
+
+func recordQPS(w io.Writer) {
+	openRecordQPS = true
+	QPSOuter = w
+}
+
+func recordReqHooker(r *gin.RouterGroup) bool { //hooker每次都执行
+	//todo fill it
+	panic("")
+}
+func QPSCounter(r *gin.RouterGroup) bool { //定时任务，记录每秒qps
+	//todo fill it
+	panic("")
+}
+
+// get请求，请求时获取qps
+func viewQPSRecord(c *gin.Context) {
+
 }
