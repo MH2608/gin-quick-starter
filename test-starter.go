@@ -14,7 +14,7 @@ func main() {
 	if err != nil {
 		fmt.Println("打开文件失败")
 	}
-	gotJson := jsonx.DecodeFromJson(string(content))
+	gotJson := jsonx.DecodeFromJson(content)
 	starter.New()
 	starter.GinStart(starter.BindStarter(gotJson)).Run(":8080")
 }

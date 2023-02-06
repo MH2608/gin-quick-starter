@@ -130,9 +130,9 @@ func (j *JObj) GetString(key string) string {
 	}
 	return ""
 }
-func DecodeFromJson(infoRaw string) *JObj {
+func DecodeFromJson(infoRaw []byte) *JObj {
 	ret := make(JObj)
-	if err := json.Unmarshal([]byte(infoRaw), &ret); err != nil {
+	if err := json.Unmarshal(infoRaw, &ret); err != nil {
 		return &ret
 	}
 	return &ret
